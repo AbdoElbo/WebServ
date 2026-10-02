@@ -1,0 +1,6 @@
+sys/socket.h
+
+int main(void)
+{
+	socket
+}

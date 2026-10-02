@@ -1,35 +1,35 @@
-NAME        = Webserv
-CXX         = c++
-INCLUDEDIR	= include
-CXXFLAGS    = -Wall -Wextra -Werror -std=c++20 -I $(INCLUDEDIR) -MD
+NAME		:=	Webserv
+CC			:=	c++
+CC_FLAGS	:=	-Wall -Wextra -Werror -std=c++20
+SRC_DIR		:=	src
+OBJ_DIR		:=	build
+SRC			:=	main.cpp \
+				HttpRequestParser.cpp
+OBJ			:=	$(addprefix $(OBJ_DIR)/,$(SRC:.cpp=.o))
+DEP			:=	$(OBJ:%.o=%.d)
+HEADERS		:=	-I include/
+VPATH		:=	$(SRC_DIR)
 
-OBJ_DIR     = obj
+all : $(NAME)
 
-SRC         = main.cpp \
-			  HttpRequestParser.cpp \
-			  
+$(NAME) : $(OBJ)
+	$(CC) $(CC_FLAGS) $(HEADERS) $(OBJ) -o $(@)
 
-OBJS        = $(addprefix $(OBJ_DIR)/, $(SRC:.cpp=.o))
+$(OBJ_DIR)/%.o : %.cpp | build
+	bear --append -- $(CC) $(CC_FLAGS) -MMD -o $@ -c $< $(HEADERS)
 
-DEPS        = $(OBJS:.o=.d)
+build :
+	mkdir -p $(OBJ_DIR)
 
-all: $(NAME)
-
-$(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
-
-$(OBJ_DIR)/%.o: %.cpp
-	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-clean:
+clean :
 	rm -rf $(OBJ_DIR)
 
-fclean: clean
+fclean : clean
 	rm -f $(NAME)
 
-re: fclean all
+re : fclean all
 
--include $(DEPS)
+-include $(DEP)
 
-.PHONY: all clean fclean re
+.PHONY : all clean re fclean
+>>>>>>> e3a5f54 (jeroen tests)
