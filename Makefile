@@ -1,9 +1,10 @@
 NAME		:=	a.out
 CC			:=	c++
-CC_FLAGS	:=	-Wall -Wextra -Werror
+CC_FLAGS	:=	-Wall -Wextra -Werror -g
 SRC_DIR		:=	src
 OBJ_DIR		:=	build
-SRC			:=	main.cpp
+SRC			:=	main.cpp \
+				WebServSocket.cpp
 OBJ			:=	$(addprefix $(OBJ_DIR)/,$(SRC:.cpp=.o))
 DEP			:=	$(OBJ:%.o=%.d)
 HEADERS		:=	-I include/
