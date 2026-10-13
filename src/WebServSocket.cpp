@@ -1,7 +1,25 @@
 #include "WebServSocket.hpp"
 #include <cstring>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 
+int sendall(int s, char *buf, int *len)
+{
+	int total = 0; // how many bytes we've sent
+	int bytesleft = *len; // how many we have left to send
+	int n;
+	while(total < *len) {
+ 		n = send(s, buf+total, bytesleft, 0);
+ 		if (n == -1) { break; }
+ 		total += n;
+ 		bytesleft -= n;
+	}
+
+	*len = total; // return number actually sent here
+
+	return n==-1?-1:0; // return -1 on failure, 0 on success
+}
 const char *inet_ntop2(void *addr, char *buf, size_t size)
 {
     struct sockaddr_storage *sas = (sockaddr_storage *)addr;
@@ -34,16 +52,6 @@ WebServSocket::~WebServSocket()
 
 }
 
-// WebServSocket::WebServSocket(const WebServSocket& other)
-// {
-
-// }
-
-// WebServSocket& WebServSocket::operator=(const WebServSocket& other)
-// {
-
-// }
-
 void WebServSocket::server_poll(){
 	for(;;) {
         int poll_count = poll(pfds.data(), fd_count, -1);
@@ -57,16 +65,17 @@ void WebServSocket::server_poll(){
     }
 }
 
+
 void WebServSocket::process_connections()
 {
 	
-    for(auto it = pfds.begin(); it != pfds.end(); it++) {
+    for(int it = 0; it < fd_count; it++) {
 
         // Check if someone's ready to read
-        if (it->revents & (POLLIN | POLLHUP)) {
+        if (pfds[it].revents & (POLLIN | POLLHUP)) {
             // We got one!!
 
-            if (it->fd == listening_fd) {
+            if (pfds[it].fd == listening_fd) {
                 // If we're the listener, it's a new connection
                 handle_new_connection();
             } else {
@@ -78,19 +87,20 @@ void WebServSocket::process_connections()
 }
 
 
-void WebServSocket::del_from_pfds(std::vector<pollfd>::iterator& pfd_i)
+void WebServSocket::del_from_pfds(int pfd_i)
 {
-    pfds.erase(pfd_i); // here might go some stuff wrong;
-	pfd_i--;
+	pfds[pfd_i] = pfds[fd_count-1];
+
+	pfds.erase(pfds.end() - 1); // here might go some stuff wrong;
     (fd_count)--;
 }
 
 
-void WebServSocket::handle_client_data(std::vector<pollfd>::iterator& pfd_i)
+void WebServSocket::handle_client_data(int &pfd_i)
 {
     char buf[256];    // Buffer for client data
-    int nbytes = recv(pfd_i->fd, buf, sizeof buf, 0);
-    int sender_fd = pfd_i->fd;
+    int nbytes = recv(pfds[pfd_i].fd, buf, sizeof buf, 0);
+    int sender_fd = pfds[pfd_i].fd;
 
     if (nbytes <= 0) { // Got error or connection closed by client
         if (nbytes == 0) {
@@ -99,9 +109,11 @@ void WebServSocket::handle_client_data(std::vector<pollfd>::iterator& pfd_i)
         } else {
             perror("recv");
         }
-        close(pfd_i->fd); // Bye!
+        close(pfds[pfd_i].fd); // Bye!
         del_from_pfds(pfd_i);
+		--pfd_i;
     } else { // We got some good data from a client
+
         std::cout << "pollserver: recv from fd " << sender_fd << ": " << buf;
         // Send to everyone!
         for(int j = 0; j < fd_count; j++) {
@@ -109,7 +121,7 @@ void WebServSocket::handle_client_data(std::vector<pollfd>::iterator& pfd_i)
 
             // Except the listener and ourselves
             if (dest_fd != listening_fd && dest_fd != sender_fd) {
-                if (send(dest_fd, buf, nbytes, 0) == -1) {
+                if (sendall(dest_fd, buf, &nbytes) == -1) {
                     perror("send");
                 }
             }
@@ -130,6 +142,19 @@ void WebServSocket::add_to_pfds(int fd)
 
 
 void WebServSocket::handle_new_connection(){
+	std::stringstream string;
+	std::ifstream f("html_pages/startpage.html");
+	if (!f.is_open()) {
+        std::cerr << "Error opening the file!";
+	}
+	std::string buffer;
+    // Read each line from the file
+	string << "HTTP/1.1 200 OK\n"
+			<< "Content-Type: text/html\nContent-Length: 471\n\n";
+	while (std::getline(f, buffer))
+        string << buffer << std::endl;;
+	string.seekg(0, std::ios::end);
+	int len = string.tellg();	
 	struct sockaddr_storage remoteaddr; // Client address
     socklen_t addrlen;
     int newfd;  // Newly accept()ed socket descriptor
@@ -145,8 +170,9 @@ void WebServSocket::handle_new_connection(){
         add_to_pfds(newfd);
 		std:: cout 	<<	"pollserver: new connection from" 
 					<< inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP)
-					<<	"in on socket " 
-					<< newfd; 
+					<<	" in on socket " 
+					<< newfd << "\n"; 
+		sendall(newfd, string.str().data(), &len);
     }
 }
 

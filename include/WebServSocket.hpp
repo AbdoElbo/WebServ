@@ -23,34 +23,33 @@ class WebServSocket
 
 		void set_listening_socket();
 		void server_poll();
-		void process_connections();
-	
+		
 	private:
-		std::vector<pollfd> pfds;
-		const char* PORT_NMBR;
-		int listening_fd;
-		int fd_size = 5;
-		int fd_count = 0;
-		void handle_client_data(std::vector<pollfd>::iterator& pfd_i);
-		void handle_new_connection();
-		void del_from_pfds(std::vector<pollfd>::iterator& pfd_i);
-		void add_to_pfds(int fd);
+		std::vector<pollfd>	pfds;
+		const char* 		PORT_NMBR;
+		int 				listening_fd;
+		int 				fd_count;
+		void 				handle_client_data(int& pfd_i);
+		void 				handle_new_connection();
+		void 				del_from_pfds(int pfd_i);
+		void 				add_to_pfds(int fd);
+		void				process_connections();
 	
-		class GetAddrInfoError : public std::exception {
-			private:
-				std::string message;
-    		public:
-				GetAddrInfoError(std::string message) : message("GetAddrInfoError: pollserver: " + message) {}
-	
-        		const char* what() const noexcept override {
-        			return ((message.c_str()));
-				}
-    	};
-    	class ListeningError : public std::exception {
-    		public:
-        		const char* what() const noexcept override {
-        		return "Error getting listening socket";
-    	};
+	class GetAddrInfoError : public std::exception {
+		private:
+			std::string message;
+		public:
+			GetAddrInfoError(std::string message) : message("GetAddrInfoError: pollserver: " + message) {}
+
+			const char* what() const noexcept override {
+				return ((message.c_str()));
+			}
+	};
+	class ListeningError : public std::exception {
+		public:
+			const char* what() const noexcept override {
+			return "Error getting listening socket";
+		}
 	}; 
 };	
 
