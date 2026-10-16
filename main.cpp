@@ -6,11 +6,12 @@
 /*   By: jukerste <jukerste@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2026/10/13 17:17:26 by jukerste      #+#    #+#                 */
-/*   Updated: 2026/10/13 17:38:27 by jukerste      ########   odam.nl         */
+/*   Updated: 2026/10/16 15:18:52 by jukerste      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Config.hpp"
+#include "Parser.hpp"
 
 int main() 
 {

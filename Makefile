@@ -7,6 +7,8 @@ OBJ_DIR     = obj
 
 SRC         = main.cpp \
 			  Tokenizer.cpp \
+			  Parser.cpp \
+			  
 
 OBJS        = $(addprefix $(OBJ_DIR)/, $(SRC:.cpp=.o))
 
