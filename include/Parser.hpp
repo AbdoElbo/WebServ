@@ -6,7 +6,7 @@
 /*   By: jukerste <jukerste@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2026/10/16 15:04:33 by jukerste      #+#    #+#                 */
-/*   Updated: 2026/10/16 15:20:21 by jukerste      ########   odam.nl         */
+/*   Updated: 2026/10/18 04:13:12 by jul           ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,4 +18,4 @@
 #include <iostream>
 #include "Config.hpp"
 
-std::vector<ServerConfig>	parse_config(const std::vector<std::string> &tokens, size_t &i);
+std::vector<ServerConfig>	parse_config(const std::vector<std::string> &tokens);

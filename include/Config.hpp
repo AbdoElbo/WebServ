@@ -6,7 +6,7 @@
 /*   By: jukerste <jukerste@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2026/10/09 16:09:23 by jukerste      #+#    #+#                 */
-/*   Updated: 2026/10/13 17:38:31 by jukerste      ########   odam.nl         */
+/*   Updated: 2026/10/17 12:54:29 by jul           ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ struct LocationConfig
 	std::string path; // for URL route (like /images or /cgi-bin)
 	std::optional<std::filesystem::path> root; //overrides global root directory if set
 	std::vector<std::string> allowed_methods; // http allowed methods {"GET", "POST"}
-	bool autoIndex = false; // true is directory listing is allowed
+	bool autoIndex = false; // true if directory listing is allowed
 	std::optional<std::string> index_file; // specific index file for this route
 	std::optional<std::string> redirect_url; // URL to redirect requests to
 	std::map<std::string, std::string> cgi_handlers; // Maps extenion for interpreter (like .py -> /usr/bin/python3)
