@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Julian_Config.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gekko <gekko@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/09 16:09:23 by jukerste          #+#    #+#             */
-/*   Updated: 2026/10/15 19:25:28 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/10/17 18:49:54 by gekko            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ struct LocationConfig
 {
 	std::string path; // for URL route (like /images or /cgi-bin)
 	std::optional<std::filesystem::path> root; //overrides global root directory if set
-	std::vector<std::string> allowed_methods; // http allowed methods {"GET", "POST"}
+	std::vector<std::string> allowed_methods; // http allowed methods {"GET", "POST", "DELETE"}
 	bool autoIndex = false; // true is directory listing is allowed
 	std::optional<std::string> index_file; // specific index file for this route
 	std::optional<std::string> redirect_url; // URL to redirect requests to
