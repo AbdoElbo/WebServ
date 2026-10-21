@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Julian_Config.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gekko <gekko@student.42.fr>                +#+  +:+       +#+        */
+/*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/09 16:09:23 by jukerste          #+#    #+#             */
-/*   Updated: 2026/10/17 18:49:54 by gekko            ###   ########.fr       */
+/*   Updated: 2026/10/21 19:07:53 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,24 +27,24 @@
 
 struct LocationConfig
 {
-	std::string path; // for URL route (like /images or /cgi-bin)
-	std::optional<std::filesystem::path> root; //overrides global root directory if set
-	std::vector<std::string> allowed_methods; // http allowed methods {"GET", "POST", "DELETE"}
-	bool autoIndex = false; // true is directory listing is allowed
-	std::optional<std::string> index_file; // specific index file for this route
-	std::optional<std::string> redirect_url; // URL to redirect requests to
-	std::map<std::string, std::string> cgi_handlers; // Maps extenion for interpreter (like .py -> /usr/bin/python3)
+	std::string path; 									// for URL route (like /images or /cgi-bin)
+	std::optional<std::filesystem::path> root; 			//overrides global root directory if set
+	std::vector<std::string> allowed_methods; 			// http allowed methods {"GET", "POST", "DELETE"}
+	bool autoIndex = false; 							// true is directory listing is allowed
+	std::optional<std::string> index_file; 				// specific index file for this route
+	std::optional<std::string> redirect_url; 			// URL to redirect requests to
+	std::map<std::string, std::string> cgi_handlers; 	// Maps extenion for interpreter (like .py -> /usr/bin/python3)
 };
 
 struct ServerConfig
 {
-	int port = 8080; // Port number the sever listens on
+	int port = 8080;								// Port number the sever listens on
 	std::string host_ip = "127.0.0.1";
-	std::vector<std::string> server_names; // something.com
-	std::optional<std::filesystem::path> root; // global root for server
+	std::vector<std::string> server_names;			// something.com
+	std::optional<std::filesystem::path> root;		// global root for server
 	std::optional<std::string> index_file;
-	size_t client_max_body = 1048576; // Default 1MB limit
-	std::map<int, std::string> error_pages; // like error code 404 or path: /error.404.html
+	size_t client_max_body = 1048576;				// Default 1MB limit
+	std::map<int, std::string> error_pages;			// like error code 404 or path: /error.404.html
 	std::vector<LocationConfig> locations;
 };
 
