@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Routing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gekko <gekko@student.42.fr>                +#+  +:+       +#+        */
+/*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:28:09 by gekko             #+#    #+#             */
-/*   Updated: 2026/10/21 23:58:16 by gekko            ###   ########.fr       */
+/*   Updated: 2026/10/23 17:54:53 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,3 +39,8 @@ struct Response
 	std::map<std::string, std::string> headers;
 	std::string	body;
 };
+
+std::string	reasonPhrase(int code);
+std::string	buildErrorPage(int code, const std::string& reason);
+Response	makeError(int code);
+Response	HandleRequest(const Request &req, const ServerConfig &SrvrConf);
