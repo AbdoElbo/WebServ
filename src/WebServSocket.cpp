@@ -95,10 +95,27 @@ void WebServSocket::del_from_pfds(int pfd_i)
     (fd_count)--;
 }
 
+std::stringstream string;
+	std::ifstream f("html_pages/startpage.html");
+	if (!f.is_open()) {
+        std::cerr << "Error opening the file!";
+	}
+	std::string buffer;
+    // Read each line from the file
+	string << "HTTP/1.1 200 OK\n"
+			<< "Content-Type: text/html\nContent-Length: 471\n\n";
+	while (std::getline(f, buffer))
+        string << buffer << std::endl;;
+	string.seekg(0, std::ios::end);
+	int len = string.tellg();	
+
+		sendall(newfd, string.str().data(), &len);
+
+
 
 void WebServSocket::handle_client_data(int &pfd_i)
 {
-    char buf[256];    // Buffer for client data
+    char buf[256];    // Buffer for request data
     int nbytes = recv(pfds[pfd_i].fd, buf, sizeof buf, 0);
     int sender_fd = pfds[pfd_i].fd;
 
@@ -142,19 +159,6 @@ void WebServSocket::add_to_pfds(int fd)
 
 
 void WebServSocket::handle_new_connection(){
-	std::stringstream string;
-	std::ifstream f("html_pages/startpage.html");
-	if (!f.is_open()) {
-        std::cerr << "Error opening the file!";
-	}
-	std::string buffer;
-    // Read each line from the file
-	string << "HTTP/1.1 200 OK\n"
-			<< "Content-Type: text/html\nContent-Length: 471\n\n";
-	while (std::getline(f, buffer))
-        string << buffer << std::endl;;
-	string.seekg(0, std::ios::end);
-	int len = string.tellg();	
 	struct sockaddr_storage remoteaddr; // Client address
     socklen_t addrlen;
     int newfd;  // Newly accept()ed socket descriptor
@@ -172,7 +176,6 @@ void WebServSocket::handle_new_connection(){
 					<< inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP)
 					<<	" in on socket " 
 					<< newfd << "\n"; 
-		sendall(newfd, string.str().data(), &len);
     }
 }
 
