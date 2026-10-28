@@ -5,90 +5,77 @@
 /*                                                     +:+                    */
 /*   By: jukerste <jukerste@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2026/10/19 15:49:00 by jukerste      #+#    #+#                 */
-/*   Updated: 2026/10/28 16:11:27 by jukerste      ########   odam.nl         */
+/*   Created: 2026/10/13 17:17:26 by jukerste      #+#    #+#                 */
+/*   Updated: 2026/10/18 04:19:07 by jul           ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "HttpRequest.hpp"
-#include "HttpRequestParser.hpp"
+#include "Config.hpp"
+#include "Parser.hpp"
 
-void run_test(const std::string& test_name, const std::string& raw_request)
+int main() 
 {
-    std::cout << "========================================\n";
-    std::cout << "TEST: " << test_name << "\n";
-    std::cout << "========================================\n";
-    
-    try {
-        HttpRequest req = HttpRequestParser::parse(raw_request);
-        
-        std::cout << "[SUCCESS] Request parsed and validated!\n";
-        std::cout << "Method       : " << req.method << "\n";
-        std::cout << "URI          : " << req.uri << "\n";
-        std::cout << "Path         : " << req.path << "\n";
-        std::cout << "Query String : " << req.query_str << "\n";
-        std::cout << "HTTP Version : " << req.http_version << "\n";
-        
-        std::cout << "--- HEADERS (" << req.headers.size() << ") ---\n";
-        for (std::map<std::string, std::string>::const_iterator it = req.headers.begin(); it != req.headers.end(); ++it) {
-            std::cout << "  [" << it->first << "] => \"" << it->second << "\"\n";
+    std::vector<std::string> tokens;
+
+    // Step 1: Tokenize
+    try 
+    {
+        tokens = tokenize("webserv.config");
+
+        std::cout << "SUCCESS! Total tokens found: " << tokens.size() << "\n\n";
+        std::cout << "Printing tokens:\n";
+        for (size_t i = 0; i < tokens.size(); ++i) 
+        {
+            std::cout << "[" << i << "] -> " << tokens[i] << "\n";
         }
-
-        std::cout << "--- QUERY PARAMETERS (" << req.query_parameters.size() << ") ---\n";
-        for (std::map<std::string, std::string>::const_iterator it = req.query_parameters.begin(); it != req.query_parameters.end(); ++it) {
-            std::cout << "  [" << it->first << "] => \"" << it->second << "\"\n";
-        }
-
-        std::cout << "--- BODY ---\n";
-        std::cout << (req.body.empty() ? "(empty)" : req.body) << "\n";
-
     } 
     catch (const std::exception& e) 
     {
-        std::cerr << "[CAUGHT ERROR]   : " << e.what() << "\n";
+        std::cerr << "Tokenizer Error: " << e.what() << "\n";
+        return 1;
     }
-    std::cout << "========================================\n\n";
-}
 
-int main()
-{
-    // Test 1: A fully valid HTTP/1.1 request with query parameters and body
-    std::string valid_request = 
-        "POST /images/upload.php?size=large&format=jpg HTTP/1.1\r\n"
-        "Host: localhost:8080\r\n"
-        "User-Agent: Mozilla/5.0 (Codam Student)\r\n"
-        "Content-Type: application/x-www-form-urlencoded\r\n"
-        "Content-Length: 29\r\n"
-        "\r\n"
-        "filename=cat.jpg&action=save";
+    // Step 2: Parse
+    try 
+    {
+        std::vector<ServerConfig> servers = parse_config(tokens);
+        std::cout << "\nSUCCESS! Parsed " << servers.size() << " server block(s).\n\n";
 
-    run_test("1. Valid POST Request", valid_request);
+        for (size_t s = 0; s < servers.size(); ++s) {
+            std::cout << "Server #" << s + 1 << ":\n";
+            std::cout << "  - Port: " << servers[s].port << "\n";
+            std::cout << "  - Host: " << servers[s].host_ip << "\n";
+            
+            std::cout << "  - Server Names: ";
+            for (const auto& name : servers[s].server_names)
+                std::cout << name << " ";
+            std::cout << "\n";
 
-    // Test 2: An invalid request (intentionally missing the mandatory 'Host' header)
-    std::string invalid_request = 
-        "GET /index.html HTTP/1.1\r\n"
-        "User-Agent: Mozilla/5.0 (Codam Student)\r\n"
-        "\r\n";
+            if (servers[s].root)
+                std::cout << "  - Root: " << servers[s].root->string() << "\n";
+            if (servers[s].index_file)
+                std::cout << "  - Index: " << *servers[s].index_file << "\n";
+                
+            std::cout << "  - Max Body Size: " << servers[s].client_max_body << "\n";
 
-    run_test("2. Invalid Request (Missing Host)", invalid_request);
-
-    // Test 3: A valid Chunked Transfer Encoding request
-    // Size 7 in hex is 7 (length of "Hello, ")
-    // Size 6 in hex is 6 (length of "World!")
-    // Followed by final chunk size 0
-    std::string chunked_request = 
-        "POST /stream HTTP/1.1\r\n"
-        "Host: localhost:8080\r\n"
-        "Transfer-Encoding: chunked\r\n"
-        "\r\n"
-        "7\r\n"
-        "Hello, \r\n"
-        "6\r\n"
-        "World!\r\n"
-        "0\r\n"
-        "\r\n";
-
-    run_test("3. Chunked Transfer Encoding Request", chunked_request);
-
+            std::cout << "  - Locations (" << servers[s].locations.size() << " found):\n";
+            for (const auto& loc : servers[s].locations) {
+                std::cout << "    * Path: " << loc.path << "\n";
+                if (loc.root)
+                    std::cout << "      Root: " << loc.root->string() << "\n";
+                std::cout << "      Autoindex: " << (loc.autoIndex ? "on" : "off") << "\n";
+                std::cout << "      Methods: ";
+                for (const auto& m : loc.allowed_methods)
+                    std::cout << m << " ";
+                std::cout << "\n";
+            }
+            std::cout << "\n";
+        }
+    } 
+    catch (const std::exception& e) 
+    {
+        std::cerr << "Parser Exception caught: " << e.what() << "\n";
+        return 1;
+    }
     return 0;
 }
