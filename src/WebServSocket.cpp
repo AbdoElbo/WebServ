@@ -118,16 +118,34 @@ int	pid_ok(int pid)
 	return (0);
 }
 
+// std::stringstream string;
+// 	std::ifstream f("html_pages/startpage.html");
+// 	if (!f.is_open()) {
+//         std::cerr << "Error opening the file!";
+// 	}
+// 	std::string buffer;
+//     // Read each line from the file
+// 	string << "HTTP/1.1 200 OK\n"
+// 			<< "Content-Type: text/html\nContent-Length: 471\n\n";
+// 	while (std::getline(f, buffer))
+//         string << buffer << std::endl;;
+// 	string.seekg(0, std::ios::end);
+// 	int len = string.tellg();	
+
+// 		sendall(newfd, string.str().data(), &len);
+
 static int	response_cgi(int fd)
 {
 	int	pid;
-
+	// (void) fd;
 	pid = fork();
 	if (pid_ok(pid))
 	{
 		write_pipe(fd);
-		const char *command[] = {"php-cgi", "status=200", NULL};
-		execve(const_cast<char *>("/usr/bin/php-cgi"), const_cast<char **>(command), NULL);
+		// const char *command[] = {"php-cgi","html_pages/tester.php", "status=200", NULL};
+		// execve(const_cast<char *>("/usr/bin/php-cgi"), const_cast<char **>(command), NULL);
+		const char *command[] = {"cat","html_pages/index.txt", NULL};
+		execve(const_cast<char *>("/usr/bin/cat"), const_cast<char **>(command), NULL);
 	}
 	return (pid);
 }

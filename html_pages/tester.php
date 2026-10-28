@@ -1,14 +1,11 @@
 <?php
-// 1. Status code
-$status = $_GET['status'] ?? $argv[1] ?? 400;
-$status = (int) $status;
-http_response_code($status); // 200 OK (this is also the default)
-
-// 2. Headers (must come before any output)
+$status = (int) ($_GET['status'] ?? $argv[1] ?? 200);
+http_response_code($status);
+header('HTTP/1.1 200 OK');
 header('Content-Type: text/html; charset=UTF-8');
-header('X-Powered-By-Me: my-first-app'); // a custom header, just as an example
+header('X-Powered-By-Me: my-first-app');
 
-// 3. Body (anything you echo or put outside the PHP tags)
+ob_start();                    // capture the body instead of sending it
 ?>
 <!DOCTYPE html>
 <html>
@@ -20,3 +17,7 @@ header('X-Powered-By-Me: my-first-app'); // a custom header, just as an example
   <p>Server time: <?php echo date('H:i:s'); ?></p>
 </body>
 </html>
+<?php
+$body = ob_get_clean();
+header('Content-Length: ' . strlen($body));  // strlen counts bytes, which is what you need
+echo $body;
