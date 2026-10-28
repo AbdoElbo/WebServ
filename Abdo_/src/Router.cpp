@@ -6,7 +6,7 @@
 /*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:27:08 by gekko             #+#    #+#             */
-/*   Updated: 2026/10/28 16:51:24 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/10/28 19:24:30 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,15 @@ const LocationConfig* findLocation(const ServerConfig &SrvrConf, std::string Pat
 	return best;
 }
 
+Response makeRedirect(const std::string &target)
+{
+	Response res;
+	res.status = 301;
+	res.reason = reasonPhrase(301);
+	res.headers["Location"] = target;
+	return res;
+}
+
 int	methodIsImplemented(std::string method)
 {
 	if (method != "GET" && method != "DELETE" && method != "POST")
@@ -55,11 +64,12 @@ Response HandleRequest(const Request &req, const ServerConfig &SrvrConf)
 	const LocationConfig* Loc = findLocation(SrvrConf, req.path);
 	if (!Loc)
 		return makeError(404); // Path doesn't exist thus 404
+	if (Loc->redirect_url)
+		return makeRedirect(*Loc->redirect_url);
 	if (!methodIsImplemented(req.method))
 		return makeError(501); // Method Not Implemented
 	if (!methodIsAllowed(Loc, req.method))
 		return makeError(405); // Method Not Allowed
-	// STILL NEED TO CHECK FOR THE Body Size with an actual Big Payload
 	if (SrvrConf.client_max_body < req.body.size())
 		return makeError(413); // Max Body Exceeded
 	return makeError(200); // SUCCESS

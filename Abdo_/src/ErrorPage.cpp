@@ -6,7 +6,7 @@
 /*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:27:08 by gekko             #+#    #+#             */
-/*   Updated: 2026/10/23 17:55:47 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/10/28 19:15:49 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,19 +16,21 @@ std::string reasonPhrase(int code)
 {
 	switch (code)
 	{
-		//NORMAL..
-		case 200: return "OK";
+		// Success
+		case 200: return "OK"; // Done
 		case 201: return "Created";
 		case 204: return "No Content";
+		// Redirect
 		case 301: return "Moved Permanently";
-		// ERRORS..
-		case 400: return "Bad Request";
-		case 403: return "Forbidden";
-		case 404: return "Not Found";
-		case 405: return "Method Not Allowed";
-		case 413: return "Payload Too Large";
-		case 500: return "Internal Server Error";
-		case 501: return "Not Implemented";
+		// Client Errors..
+		case 400: return "Bad Request"; // done in the parsing
+		case 403: return "Forbidden"; // should be in the configFile
+		case 404: return "Not Found"; // Done
+		case 405: return "Method Not Allowed"; // Done
+		case 413: return "Payload Too Large"; // Done
+		// Server Errors..
+		case 500: return "Internal Server Error"; // ...
+		case 501: return "Not Implemented"; // Done
 		case 504: return "Gateway Timeout";
 		default:  return "Error";
 	}
