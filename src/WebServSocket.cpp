@@ -1,8 +1,11 @@
 #include "WebServSocket.hpp"
 #include <cstring>
+#include <exception>
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <unistd.h>
+
 
 int sendall(int s, char *buf, int *len)
 {
@@ -95,23 +98,39 @@ void WebServSocket::del_from_pfds(int pfd_i)
     (fd_count)--;
 }
 
-std::stringstream string;
-	std::ifstream f("html_pages/startpage.html");
-	if (!f.is_open()) {
-        std::cerr << "Error opening the file!";
+void	write_pipe(int fd)
+{
+	if (dup2(fd, STDOUT_FILENO) == -1)
+	{
+		throw std::runtime_error("test");
 	}
-	std::string buffer;
-    // Read each line from the file
-	string << "HTTP/1.1 200 OK\n"
-			<< "Content-Type: text/html\nContent-Length: 471\n\n";
-	while (std::getline(f, buffer))
-        string << buffer << std::endl;;
-	string.seekg(0, std::ios::end);
-	int len = string.tellg();	
+}
 
-		sendall(newfd, string.str().data(), &len);
+int	pid_ok(int pid)
+{
+	if (pid == -1)
+	{
+		perror("Fork");
+		exit(errno);
+	}
+	if (pid == 0)
+		return (1);
+	return (0);
+}
 
+static int	response_cgi(int fd)
+{
+	int	pid;
 
+	pid = fork();
+	if (pid_ok(pid))
+	{
+		write_pipe(fd);
+		const char *command[] = {"php-cgi", "status=200", NULL};
+		execve(const_cast<char *>("/usr/bin/php-cgi"), const_cast<char **>(command), NULL);
+	}
+	return (pid);
+}
 
 void WebServSocket::handle_client_data(int &pfd_i)
 {
@@ -133,16 +152,7 @@ void WebServSocket::handle_client_data(int &pfd_i)
 
         std::cout << "pollserver: recv from fd " << sender_fd << ": " << buf;
         // Send to everyone!
-        for(int j = 0; j < fd_count; j++) {
-            int dest_fd = pfds[j].fd;
-
-            // Except the listener and ourselves
-            if (dest_fd != listening_fd && dest_fd != sender_fd) {
-                if (sendall(dest_fd, buf, &nbytes) == -1) {
-                    perror("send");
-                }
-            }
-        }
+        response_cgi(sender_fd);
     }
 }
 
