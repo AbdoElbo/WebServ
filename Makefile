@@ -6,8 +6,7 @@ CXXFLAGS    = -Wall -Wextra -Werror -std=c++20 -I $(INCLUDEDIR) -MD
 OBJ_DIR     = obj
 
 SRC         = main.cpp \
-			  Tokenizer.cpp \
-			  Parser.cpp \
+			  HttpRequestParser.cpp \
 			  
 
 OBJS        = $(addprefix $(OBJ_DIR)/, $(SRC:.cpp=.o))
