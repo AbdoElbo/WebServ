@@ -7,6 +7,8 @@ OBJ_DIR     = obj
 
 SRC         = main.cpp \
 			  HttpRequestParser.cpp \
+			  Parser.cpp \
+			  Tokenizer.cpp \
 			  
 
 OBJS        = $(addprefix $(OBJ_DIR)/, $(SRC:.cpp=.o))
