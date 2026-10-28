@@ -6,7 +6,7 @@
 /*   By: jukerste <jukerste@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2026/10/19 15:49:00 by jukerste      #+#    #+#                 */
-/*   Updated: 2026/10/27 16:51:07 by jukerste      ########   odam.nl         */
+/*   Updated: 2026/10/28 16:11:27 by jukerste      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,24 @@ int main()
         "\r\n";
 
     run_test("2. Invalid Request (Missing Host)", invalid_request);
+
+    // Test 3: A valid Chunked Transfer Encoding request
+    // Size 7 in hex is 7 (length of "Hello, ")
+    // Size 6 in hex is 6 (length of "World!")
+    // Followed by final chunk size 0
+    std::string chunked_request = 
+        "POST /stream HTTP/1.1\r\n"
+        "Host: localhost:8080\r\n"
+        "Transfer-Encoding: chunked\r\n"
+        "\r\n"
+        "7\r\n"
+        "Hello, \r\n"
+        "6\r\n"
+        "World!\r\n"
+        "0\r\n"
+        "\r\n";
+
+    run_test("3. Chunked Transfer Encoding Request", chunked_request);
 
     return 0;
 }

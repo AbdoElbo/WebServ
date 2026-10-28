@@ -6,11 +6,59 @@
 /*   By: jukerste <jukerste@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2026/10/19 16:04:23 by jukerste      #+#    #+#                 */
-/*   Updated: 2026/10/27 16:49:39 by jukerste      ########   odam.nl         */
+/*   Updated: 2026/10/28 16:10:10 by jukerste      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpRequestParser.hpp"
+
+std::string HttpRequestParser::decode_chunked_body(const std::string &raw_body)
+{
+	std::string decoded = "";
+	size_t pos = 0;
+
+	while (pos < raw_body.length())
+	{
+		// 1. Find the end of the chunk size line
+		size_t end_of_line = raw_body.find("\r\n", pos);
+		if (end_of_line == std::string::npos)
+			throw std::runtime_error("400 Bad Request: Malformed chunked body");
+		
+		std::string line_size = raw_body.substr(pos, end_of_line - pos);
+		pos = end_of_line + 2; // skip /r/n
+
+		// Handle optional chunk extensions (like "4;some-extension")
+		size_t semicolon_pos = line_size.find(';');
+		if (semicolon_pos != std::string::npos)
+			line_size = line_size.substr(0, semicolon_pos);
+		
+		// 2. Convert hex size string to a numeric size_t
+		size_t chunk_size = 0;
+		std::stringstream source;
+		source << std::hex << line_size;
+		source >> chunk_size;
+
+		if (source.fail())
+			throw std::runtime_error("400 Bad Request: Invalid hex chunk size");
+		// 3. If chunk size is 0, we've hit the final chunk terminator
+		if (chunk_size == 0)
+			break ;
+		
+		// 4. Extract the chunk data
+		if (pos + chunk_size > raw_body.length())
+			throw std::runtime_error("400 Bad Request: Chunk size exceeds data length");
+		
+		decoded.append(raw_body, pos, chunk_size);
+		pos = pos + chunk_size;
+		
+		// 5. Skip the trailing \r\n after the chunk data
+		if (pos + 2 < raw_body.length() && raw_body.substr(pos, 2) == "\r\n")
+			pos = pos + 2;
+		else
+			throw std::runtime_error("400 Bad Request: Missing chunk trailing return and newline characters");
+	}
+	return (decoded);
+}
 
 void HttpRequestParser::parse_request_line(const std::string &line, HttpRequest &request)
 {
@@ -89,13 +137,10 @@ void HttpRequestParser::parse_query_str(const std::string &query_str, HttpReques
 void HttpRequestParser::validate_request(const HttpRequest &request)
 {
 	if (request.http_version != "HTTP/1.1" && request.http_version != "HTTP/1.0")
-	{
 		throw std::runtime_error("505: HTTP version not supported: " + request.http_version);
-	}
+	
 	if (request.headers.find("host") == request.headers.end())
-	{
 		throw std::runtime_error("400 Bad Request: Missing mandatory 'Host' header");
-	}
 }
 
 HttpRequest HttpRequestParser::parse(const std::string &raw_data)
@@ -123,9 +168,7 @@ HttpRequest HttpRequestParser::parse(const std::string &raw_data)
 			body_section = raw_data.substr(header_end + 2);
 		}
 		else
-		{
 			header_section = raw_data; // no body found, only headers/request line
-		}
 	}
 	std::stringstream source(header_section);
 	std::string line;
@@ -146,7 +189,11 @@ HttpRequest HttpRequestParser::parse(const std::string &raw_data)
 		else
 			parse_header(line, request);
 	}
-	request.body = body_section;
+	if (request.headers.find("transfer-encoding") != request.headers.end() && request.headers["transfer-encoding"].find("chunked") != std::string::npos)
+		request.body = decode_chunked_body(body_section);
+	else
+		request.body = body_section;
+	
 	validate_request(request);
 	request.is_complete = true;
 	return (request);
