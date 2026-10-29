@@ -68,7 +68,7 @@ void WebServSocket::server_poll(){
 
 void WebServSocket::process_connections()
 {
-	
+
     for(int it = 0; it < fd_count; it++) {
 
         // Check if someone's ready to read
@@ -143,7 +143,7 @@ void WebServSocket::add_to_pfds(int fd)
 
 void WebServSocket::handle_new_connection(){
 	std::stringstream string;
-	std::ifstream f("html_pages/startpage.html");
+	std::ifstream f("www/Pages/about.html");
 	if (!f.is_open()) {
         std::cerr << "Error opening the file!";
 	}
@@ -154,7 +154,7 @@ void WebServSocket::handle_new_connection(){
 	while (std::getline(f, buffer))
         string << buffer << std::endl;;
 	string.seekg(0, std::ios::end);
-	int len = string.tellg();	
+	int len = string.tellg();
 	struct sockaddr_storage remoteaddr; // Client address
     socklen_t addrlen;
     int newfd;  // Newly accept()ed socket descriptor
@@ -168,10 +168,10 @@ void WebServSocket::handle_new_connection(){
         perror("accept");
     } else {
         add_to_pfds(newfd);
-		std:: cout 	<<	"pollserver: new connection from" 
+		std:: cout 	<<	"pollserver: new connection from"
 					<< inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP)
-					<<	" in on socket " 
-					<< newfd << "\n"; 
+					<<	" in on socket "
+					<< newfd << "\n";
 		sendall(newfd, string.str().data(), &len);
     }
 }

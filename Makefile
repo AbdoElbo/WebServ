@@ -4,10 +4,11 @@ CC_FLAGS	:=	-Wall -Wextra -Werror -std=c++20
 SRC_DIR		:=	src
 OBJ_DIR		:=	build
 SRC			:=	main.cpp \
-				WebServSocket.cpp
+				WebServSocket.cpp \
+				ErrorPage.cpp Router.cpp
 OBJ			:=	$(addprefix $(OBJ_DIR)/,$(SRC:.cpp=.o))
 DEP			:=	$(OBJ:%.o=%.d)
-HEADERS		:=	-I include/
+HEADERS		:=	-I include/ -I Abdo/include
 VPATH		:=	$(SRC_DIR)
 
 all : $(NAME)
@@ -16,7 +17,7 @@ $(NAME) : $(OBJ)
 	$(CC) $(CC_FLAGS) $(HEADERS) $(OBJ) -o $(@)
 
 $(OBJ_DIR)/%.o : %.cpp | build
-	bear --append -- $(CC) $(CC_FLAGS) -MMD -o $@ -c $< $(HEADERS)
+	$(CC) $(CC_FLAGS) -MMD -o $@ -c $< $(HEADERS)
 
 build :
 	mkdir -p $(OBJ_DIR)
