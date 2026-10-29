@@ -142,17 +142,19 @@ static int	response_cgi(int fd)
 	if (pid_ok(pid))
 	{
 		write_pipe(fd);
-		// const char *command[] = {"php-cgi","html_pages/tester.php", "status=200", NULL};
+		// const char *command[] = {"php-cgi", "-q","html_pages/tester.php", "status=200", NULL};
 		// execve(const_cast<char *>("/usr/bin/php-cgi"), const_cast<char **>(command), NULL);
-		const char *command[] = {"cat","html_pages/index.txt", NULL};
-		execve(const_cast<char *>("/usr/bin/cat"), const_cast<char **>(command), NULL);
+		// const char *command[] = {"cat","html_pages/index.txt", NULL};
+		// execve(const_cast<char *>("/usr/bin/cat"), const_cast<char **>(command), NULL);
+		const char *command[] = {"./html_pages/a.out","html_pages/index.txt", NULL};
+		execve(const_cast<char *>(command[0]), const_cast<char **>(command), NULL);
 	}
 	return (pid);
 }
 
 void WebServSocket::handle_client_data(int &pfd_i)
 {
-    char buf[256];    // Buffer for request data
+    char buf[10000];    // Buffer for request data
     int nbytes = recv(pfds[pfd_i].fd, buf, sizeof buf, 0);
     int sender_fd = pfds[pfd_i].fd;
 

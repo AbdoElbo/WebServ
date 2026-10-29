@@ -1,9 +1,7 @@
 <?php
 $status = (int) ($_GET['status'] ?? $argv[1] ?? 200);
 http_response_code($status);
-header('HTTP/1.1 200 OK');
-header('Content-Type: text/html; charset=UTF-8');
-header('X-Powered-By-Me: my-first-app');
+header('Content-Type: text/html');
 
 ob_start();                    // capture the body instead of sending it
 ?>
