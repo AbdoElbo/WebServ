@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upload pictures | Picture Corner</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><nav><a href="index.html">Home</a><a href="upload.html">Upload pictures</a></nav></header>
+<main>
+  <h1>Let's add your pictures</h1>
+  <p class="lead">Drag pictures here, or choose them from your device. We're glad you're sharing.</p>
+  <form id="form" action="#" method="post" enctype="multipart/form-data">
+    <div class="drop" id="drop">
+      <input type="file" id="files" name="pictures" accept="image/*" multiple>
+      <label for="files"><strong>Choose pictures</strong><br>or drop them here</label>
+    </div>
+    <p id="status" aria-live="polite" class="lead">No pictures chosen yet.</p>
+    <div class="grid" id="grid"></div>
+    <p><button class="btn" type="submit">Upload pictures</button></p>
+  </form>
+</main>
+<footer>Tip: set the form's <code>action</code> to your server's upload address.</footer>
+<script>
+const input=document.getElementById('files'),grid=document.getElementById('grid'),
+status=document.getElementById('status'),drop=document.getElementById('drop');
+function show(files){
+  grid.innerHTML='';
+  const imgs=[...files].filter(f=>f.type.startsWith('image/'));
+  imgs.forEach(f=>{const i=document.createElement('img');i.src=URL.createObjectURL(f);i.alt=f.name;grid.appendChild(i)});
+  status.textContent=imgs.length?imgs.length+(imgs.length===1?' picture':' pictures')+' ready to upload.':'No pictures chosen yet.';
+}
+input.addEventListener('change',()=>show(input.files));
+['dragover','dragenter'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',ev=>{input.files=ev.dataTransfer.files;show(input.files)});
+document.getElementById('form').addEventListener('submit',ev=>{
+  if(!input.files.length){ev.preventDefault();status.textContent='Choose at least one picture first.'}
+  else if(ev.target.getAttribute('action')==='#'){ev.preventDefault();status.textContent='Thank you! Your pictures are ready. Connect this form to a server to send them.'}
+});
+</script>
+</body>
+</html>
