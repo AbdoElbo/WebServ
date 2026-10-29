@@ -6,11 +6,25 @@
 /*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:27:08 by gekko             #+#    #+#             */
-/*   Updated: 2026/10/28 19:24:30 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/10/29 17:03:50 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Routing.hpp"
+
+static bool locationMatches(const std::string &locPath, const std::string &urlPath)
+{
+	// 1. the URL must start with the location path
+	if (urlPath.compare(0, locPath.size(), locPath) != 0)
+		return false;
+
+	// 2. then the match must end on a segment boundary
+	if (urlPath.size() == locPath.size())
+		return true;                       // exact match: /uploads == /uploads
+	if (locPath.back() == '/')
+		return true;                       // location is "/", so everything under it matches
+	return urlPath[locPath.size()] == '/'; // next char must be '/', so /uploads/x yes, /uploadsss no
+}
 
 const LocationConfig* findLocation(const ServerConfig &SrvrConf, std::string Path)
 {
@@ -24,7 +38,7 @@ const LocationConfig* findLocation(const ServerConfig &SrvrConf, std::string Pat
 		//	Path = /uploads/folder1/sup/cat.png
 		// temp.path = /uploads/folder1/
 		// so up to temp.path.size(), Path does match temp.path, thus Location does exist
-		if (Path.compare(0, temp.path.size(), temp.path) == 0)
+		if (locationMatches(temp.path, Path))
 		{
 			if (best == nullptr || temp.path.size() > best->path.size())
 				best = &temp;

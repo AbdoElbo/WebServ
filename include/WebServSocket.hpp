@@ -12,6 +12,7 @@
 #include <vector>
 #ifndef WEBSERVSOCKET_HPP
 #define WEBSERVSOCKET_HPP
+#include "Routing.hpp"
 
 class WebServSocket
 {
@@ -23,18 +24,20 @@ class WebServSocket
 
 		void set_listening_socket();
 		void server_poll();
-		
+		void set_config(const ServerConfig &cfg) { config = &cfg; }
+
 	private:
 		std::vector<pollfd>	pfds;
 		const char* 		PORT_NMBR;
-		int 				listening_fd;
 		int 				fd_count;
+		const ServerConfig *config;
+		int 				listening_fd;
 		void 				handle_client_data(int& pfd_i);
 		void 				handle_new_connection();
 		void 				del_from_pfds(int pfd_i);
 		void 				add_to_pfds(int fd);
 		void				process_connections();
-	
+
 	class GetAddrInfoError : public std::exception {
 		private:
 			std::string message;
@@ -50,7 +53,7 @@ class WebServSocket
 			const char* what() const noexcept override {
 			return "Error getting listening socket";
 		}
-	}; 
-};	
+	};
+};
 
 #endif // WEB_SERV_SOCKET_HPP

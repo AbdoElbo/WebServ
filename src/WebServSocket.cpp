@@ -43,7 +43,7 @@ const char *inet_ntop2(void *addr, char *buf, size_t size)
     return inet_ntop(sas->ss_family, src, buf, size);
 }
 
-WebServSocket::WebServSocket(const char *PORT): PORT_NMBR(PORT), fd_count(0)
+WebServSocket::WebServSocket(const char *PORT): PORT_NMBR(PORT), fd_count(0), config(nullptr)
 {
 }
 
@@ -95,6 +95,19 @@ void WebServSocket::del_from_pfds(int pfd_i)
     (fd_count)--;
 }
 
+inline std::string serializeResponse(const Response &r)
+{
+	Response res = r;
+	if (res.headers.find("Content-Length") == res.headers.end())
+		res.headers["Content-Length"] = std::to_string(res.body.size());
+
+	std::string out = "HTTP/1.1 " + std::to_string(res.status) + " " + res.reason + "\r\n";
+	for (const auto &h : res.headers)
+		out += h.first + ": " + h.second + "\r\n";
+	out += "\r\n";
+	out += res.body;
+	return out;
+}
 
 void WebServSocket::handle_client_data(int &pfd_i)
 {
@@ -112,20 +125,16 @@ void WebServSocket::handle_client_data(int &pfd_i)
         close(pfds[pfd_i].fd); // Bye!
         del_from_pfds(pfd_i);
 		--pfd_i;
-    } else { // We got some good data from a client
+    } else {
+        std::string raw(buf, nbytes);
+        Request req;
+        std::istringstream in(raw);
+        in >> req.method >> req.path >> req.version;
 
-        std::cout << "pollserver: recv from fd " << sender_fd << ": " << buf;
-        // Send to everyone!
-        for(int j = 0; j < fd_count; j++) {
-            int dest_fd = pfds[j].fd;
-
-            // Except the listener and ourselves
-            if (dest_fd != listening_fd && dest_fd != sender_fd) {
-                if (sendall(dest_fd, buf, &nbytes) == -1) {
-                    perror("send");
-                }
-            }
-        }
+        Response res = HandleRequest(req, *config);
+        std::string out = serializeResponse(res);
+        int len = out.size();
+        sendall(sender_fd, &out[0], &len);
     }
 }
 
@@ -140,42 +149,23 @@ void WebServSocket::add_to_pfds(int fd)
     (fd_count)++;
 }
 
+void WebServSocket::handle_new_connection()
+{
+	struct sockaddr_storage remoteaddr;
+	socklen_t addrlen = sizeof remoteaddr;
+	char remoteIP[INET6_ADDRSTRLEN];
 
-void WebServSocket::handle_new_connection(){
-	std::stringstream string;
-	std::ifstream f("www/Pages/about.html");
-	if (!f.is_open()) {
-        std::cerr << "Error opening the file!";
+	int newfd = accept(listening_fd, (struct sockaddr *)&remoteaddr, &addrlen);
+
+	if (newfd == -1) {
+		perror("accept");
+	} else {
+		add_to_pfds(newfd);
+		std::cout << "pollserver: new connection from "
+		          << inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP)
+		          << " on socket " << newfd << "\n";
 	}
-	std::string buffer;
-    // Read each line from the file
-	string << "HTTP/1.1 200 OK\n"
-			<< "Content-Type: text/html\nContent-Length: 471\n\n";
-	while (std::getline(f, buffer))
-        string << buffer << std::endl;;
-	string.seekg(0, std::ios::end);
-	int len = string.tellg();
-	struct sockaddr_storage remoteaddr; // Client address
-    socklen_t addrlen;
-    int newfd;  // Newly accept()ed socket descriptor
-    char remoteIP[INET6_ADDRSTRLEN];
-
-    addrlen = sizeof remoteaddr;
-    newfd = accept(listening_fd, (struct sockaddr *)&remoteaddr,
-            &addrlen);
-
-    if (newfd == -1) {
-        perror("accept");
-    } else {
-        add_to_pfds(newfd);
-		std:: cout 	<<	"pollserver: new connection from"
-					<< inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP)
-					<<	" in on socket "
-					<< newfd << "\n";
-		sendall(newfd, string.str().data(), &len);
-    }
 }
-
 void WebServSocket::set_listening_socket()
 {
     int listener;     // Listening socket descriptor
