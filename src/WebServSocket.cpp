@@ -68,23 +68,43 @@ void WebServSocket::server_poll(){
     }
 }
 
+void WebServSocket::handle_cgi_response(std::map<int,int>::iterator resp)
+{
+	char buff[10000];
+	int amnt_read;
+	send(resp->second, "HTTP/1.1 200 OK\nContent-Length: 135\n",36,0);
+	while ((amnt_read = read(resp->first, buff, 10000)) != 0)
+	{
+		sendall(resp->second, buff, &amnt_read);
+	}
+	del_from_pfds(resp->first);
+	cgi_map_fds.erase(resp);
+}
 
 void WebServSocket::process_connections()
 {
-	
+	std::map<int,int>::iterator resp;
+
     for(int it = 0; it < fd_count; it++) {
 
         // Check if someone's ready to read
-        if (pfds[it].revents & (POLLIN | POLLHUP)) {
+		if (pfds[it].revents & (POLLIN | POLLHUP)) {
             // We got one!!
-
-            if (pfds[it].fd == listening_fd) {
-                // If we're the listener, it's a new connection
-                handle_new_connection();
-            } else {
+			if (pfds[it].fd == listening_fd) 
+			{
+				 // If we're the listener, it's a new connection
+				handle_new_connection();
+            } 
+			else if ((resp = cgi_map_fds.find(pfds[it].fd)) != cgi_map_fds.end())
+			{
+				handle_cgi_response(resp);
+			}
+			else 
+			{
                 // Otherwise we're just a regular client
-                handle_client_data(it);
+                handle_client_request(it);
             }
+	
         }
     }
 }
@@ -134,14 +154,20 @@ int	pid_ok(int pid)
 
 // 		sendall(newfd, string.str().data(), &len);
 
-static int	response_cgi(int fd)
+int	WebServSocket::response_cgi(int fd)
 {
 	int	pid;
-	// (void) fd;
+	int cgi_in[2];
+	(void)cgi_in;
+	int cgi_out[2];
+	// pipe(cgi_in); // i will implement later.
+	pipe(cgi_out);
+	add_to_pfds(cgi_out[0]);
+	cgi_map_fds.insert({cgi_out[0], fd});
 	pid = fork();
 	if (pid_ok(pid))
 	{
-		write_pipe(fd);
+		write_pipe(cgi_out[1]);
 		// const char *command[] = {"php-cgi", "-q","html_pages/tester.php", "status=200", NULL};
 		// execve(const_cast<char *>("/usr/bin/php-cgi"), const_cast<char **>(command), NULL);
 		// const char *command[] = {"cat","html_pages/index.txt", NULL};
@@ -149,10 +175,11 @@ static int	response_cgi(int fd)
 		const char *command[] = {"./html_pages/a.out","html_pages/index.txt", NULL};
 		execve(const_cast<char *>(command[0]), const_cast<char **>(command), NULL);
 	}
+	close(cgi_out[1]); //make better
 	return (pid);
 }
 
-void WebServSocket::handle_client_data(int &pfd_i)
+void WebServSocket::handle_client_request(int &pfd_i)
 {
     char buf[10000];    // Buffer for request data
     int nbytes = recv(pfds[pfd_i].fd, buf, sizeof buf, 0);
@@ -163,6 +190,7 @@ void WebServSocket::handle_client_data(int &pfd_i)
             // Connection closed
             std::cout << "pollserver: socket" << sender_fd << "hung up\n" ;
         } else {
+			std::cerr << pfds[pfd_i].fd << "\n";
             perror("recv");
         }
         close(pfds[pfd_i].fd); // Bye!
@@ -170,7 +198,7 @@ void WebServSocket::handle_client_data(int &pfd_i)
 		--pfd_i;
     } else { // We got some good data from a client
 
-        std::cout << "pollserver: recv from fd " << sender_fd << ": " << buf;
+        std::cout << "pollserver: recv from fd " << sender_fd << ": " << std::string_view(buf, nbytes);;
         // Send to everyone!
         response_cgi(sender_fd);
     }

@@ -1,6 +1,6 @@
 NAME		:=	Webserv
 CC			:=	c++
-CC_FLAGS	:=	-Wall -Wextra -Werror -std=c++20
+CC_FLAGS	:=	-Wall -Wextra -Werror -g -std=c++20
 SRC_DIR		:=	src
 OBJ_DIR		:=	build
 SRC			:=	main.cpp \

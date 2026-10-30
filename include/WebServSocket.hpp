@@ -1,5 +1,6 @@
 #include "exception"
 #include "string"
+#include <map>
 #include <string>
 #include <stdlib.h>
 #include <unistd.h>
@@ -21,19 +22,23 @@ class WebServSocket
 		WebServSocket& operator=(const WebServSocket& other);
 		~WebServSocket();
 
+
 		void set_listening_socket();
 		void server_poll();
-		
 	private:
 		std::vector<pollfd>	pfds;
+		std::map<int, int>	cgi_map_fds;
 		const char* 		PORT_NMBR;
 		int 				listening_fd;
 		int 				fd_count;
-		void 				handle_client_data(int& pfd_i);
+		void 				handle_client_request(int& pfd_i);
 		void 				handle_new_connection();
 		void 				del_from_pfds(int pfd_i);
 		void 				add_to_pfds(int fd);
 		void				process_connections();
+		int				response_cgi(int fd);
+		void				handle_cgi_response(std::map<int,int>::iterator resp);
+
 	
 	class GetAddrInfoError : public std::exception {
 		private:
