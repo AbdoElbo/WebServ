@@ -27,16 +27,20 @@
 
 ServerConfig makeTestConfig()
 {
-	// LocationConfig rootLoc;
-	// rootLoc.path = "/";
-	// rootLoc.allowed_methods = {"GET"};
+	LocationConfig rootLoc;
+	rootLoc.path = "/";
+	rootLoc.allowed_methods = {"GET"};
+
+	LocationConfig PagesLoc;
+	rootLoc.path = "../Pages";
+	rootLoc.allowed_methods = {"GET"};
 
 	LocationConfig uploadLoc;
 	uploadLoc.path = "/uploads";
 	uploadLoc.allowed_methods = {"GET", "POST", "DELETE"};
 
 	LocationConfig imagesLoc;
-	imagesLoc.path = "/images";
+	imagesLoc.path = "/images/img";
 	imagesLoc.allowed_methods = {"GET", "POST"};
 
 	LocationConfig redir;
@@ -46,7 +50,7 @@ ServerConfig makeTestConfig()
 
 	ServerConfig server;
 	server.root = "./www";
-	server.locations = {imagesLoc, uploadLoc, redir};
+	server.locations = {PagesLoc, rootLoc, imagesLoc, uploadLoc, redir};
 	return server;
 }
 

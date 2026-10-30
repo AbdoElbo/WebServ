@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Router.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gekko <gekko@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:27:08 by gekko             #+#    #+#             */
-/*   Updated: 2026/10/29 17:03:50 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/10/30 18:07:13 by gekko            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,19 @@ int	methodIsAllowed(const LocationConfig *Loc, std::string method)
 	return 0;
 }
 
+int	CheckFileExistance(const LocationConfig* Loc, const Request &req)
+{
+	std::string FileName = req.path.substr(Loc->path.size() + 1);
+	std::filesystem::path p = std::filesystem::path(Loc->path) / FileName;
+	if (std::filesystem::exists(p))
+	{
+		std::cout <<BY<< "File " << FileName << " EXISTS in " << Loc->path <<RESET<< std::endl;
+		return 1;
+	}
+	std::cout <<BY<< "File " << FileName << " does NOOTTTT exist in " << Loc->path <<RESET<< std::endl;
+	return 0;
+}
+
 Response HandleRequest(const Request &req, const ServerConfig &SrvrConf)
 {
 	const LocationConfig* Loc = findLocation(SrvrConf, req.path);
@@ -86,5 +99,7 @@ Response HandleRequest(const Request &req, const ServerConfig &SrvrConf)
 		return makeError(405); // Method Not Allowed
 	if (SrvrConf.client_max_body < req.body.size())
 		return makeError(413); // Max Body Exceeded
+	if (!CheckFileExistance(Loc, req))
+		return makeError(404); // File doesn't exist
 	return makeError(200); // SUCCESS
 }
