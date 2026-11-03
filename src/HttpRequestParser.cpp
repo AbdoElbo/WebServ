@@ -6,7 +6,7 @@
 /*   By: jvan-ast <jvan-ast@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/19 16:04:23 by jukerste          #+#    #+#             */
-/*   Updated: 2026/11/02 17:56:14 by jvan-ast         ###   ########.fr       */
+/*   Updated: 2026/11/03 16:59:59 by jvan-ast         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,28 +105,28 @@ HttpRequest HttpRequestParser::parse(const std::string &raw_data)
 	if (raw_data.empty())
 		return (request);
 
-	// size_t header_end = raw_data.find("\r\n\r\n");
+	size_t header_end = raw_data.find("\r\n\r\n");
 	std::string header_section;
 	std::string body_section;
 
-	// if (header_end != std::string::npos)
-	// {
-	// 	header_section = raw_data.substr(0, header_end);
-	// 	body_section = raw_data.substr(header_end + 4);
-	// }
-	// else
-	// {
-	// 	header_end = raw_data.find("\n\n");
-	// 	if (header_end != std::string::npos)
-	// 	{
-	// 		header_section = raw_data.substr(0, header_end);
-	// 		body_section = raw_data.substr(header_end + 2);
-	// 	}
-	// 	else
-	// 	{
-	// 		header_section = raw_data; // no body found, only headers/request line
-	// 	}
-	// }
+	if (header_end != std::string::npos)
+	{
+		header_section = raw_data.substr(0, header_end);
+		body_section = raw_data.substr(header_end + 4);
+	}
+	else
+	{
+		header_end = raw_data.find("\n\n");
+		if (header_end != std::string::npos)
+		{
+			header_section = raw_data.substr(0, header_end);
+			body_section = raw_data.substr(header_end + 2);
+		}
+		else
+		{
+			header_section = raw_data; // no body found, only headers/request line
+		}
+	}
 	std::stringstream source(header_section);
 	std::string line;
 	bool is_first_line = true;

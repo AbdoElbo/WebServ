@@ -1,6 +1,6 @@
 NAME		:=	Webserv
 CC			:=	c++
-CC_FLAGS	:=	-Wall -Wextra -Werror -g -std=c++20
+CC_FLAGS	:=	-Wall -Wextra -Werror -g -std=c++20 -O0 -fsanitize=address -fno-omit-frame-pointer
 SRC_DIR		:=	src
 OBJ_DIR		:=	build
 SRC			:=	main.cpp \

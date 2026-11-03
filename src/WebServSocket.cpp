@@ -1,9 +1,11 @@
 #include "WebServSocket.hpp"
+#include <algorithm>
 #include <cstring>
 #include <exception>
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <sys/poll.h>
 #include <unistd.h>
 #include "helper_func.h"
 
@@ -39,8 +41,14 @@ void WebServSocket::handle_cgi_response(std::map<int,int>::iterator resp)
 	{
 		sendall(resp->second, buff, &amnt_read);
 	}
-	del_from_pfds(resp->first);
-	// cgi_map_fds.erase(resp);
+	std::vector<pollfd>::iterator found = std::find_if(pfds.begin(), pfds.end(), [&](pollfd& x){
+		if (x.fd == resp->first)
+			return (1);
+		return (0);
+	});
+	if (found != pfds.end())
+		del_from_pfds(found - pfds.begin());
+	cgi_map_fds.erase(resp);
 }
 
 void WebServSocket::process_connections()
@@ -114,7 +122,7 @@ int	WebServSocket::response_cgi(int fd)
 
 void WebServSocket::handle_client_request(int &pfd_i)
 {
-    char buf[10000];    // Buffer for request data
+    char buf[1000];    // Buffer for request data
     int nbytes = recv(pfds[pfd_i].fd, buf, sizeof buf, 0);
     int sender_fd = pfds[pfd_i].fd;
 
