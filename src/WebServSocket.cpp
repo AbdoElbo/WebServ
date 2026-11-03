@@ -5,46 +5,8 @@
 #include <sstream>
 #include <fstream>
 #include <unistd.h>
+#include "helper_func.h"
 
-
-int sendall(int s, char *buf, int *len)
-{
-	int total = 0; // how many bytes we've sent
-	int bytesleft = *len; // how many we have left to send
-	int n;
-	while(total < *len) {
- 		n = send(s, buf+total, bytesleft, 0);
- 		if (n == -1) { break; }
- 		total += n;
- 		bytesleft -= n;
-	}
-
-	*len = total; // return number actually sent here
-
-	return n==-1?-1:0; // return -1 on failure, 0 on success
-}
-const char *inet_ntop2(void *addr, char *buf, size_t size)
-{
-    struct sockaddr_storage *sas = (sockaddr_storage *)addr;
-    struct sockaddr_in *sa4;
-    struct sockaddr_in6 *sa6;
-    void *src;
-
-    switch (sas->ss_family) {
-        case AF_INET:
-            sa4 = (sockaddr_in *)addr;
-            src = &(sa4->sin_addr);
-            break;
-        case AF_INET6:
-            sa6 = (sockaddr_in6 *)addr;
-            src = &(sa6->sin6_addr);
-            break;
-        default:
-            return NULL;
-    }
-
-    return inet_ntop(sas->ss_family, src, buf, size);
-}
 
 WebServSocket::WebServSocket(const char *PORT): PORT_NMBR(PORT), fd_count(0)
 {
@@ -78,7 +40,7 @@ void WebServSocket::handle_cgi_response(std::map<int,int>::iterator resp)
 		sendall(resp->second, buff, &amnt_read);
 	}
 	del_from_pfds(resp->first);
-	cgi_map_fds.erase(resp);
+	// cgi_map_fds.erase(resp);
 }
 
 void WebServSocket::process_connections()
@@ -118,55 +80,23 @@ void WebServSocket::del_from_pfds(int pfd_i)
     (fd_count)--;
 }
 
-void	write_pipe(int fd)
-{
-	if (dup2(fd, STDOUT_FILENO) == -1)
-	{
-		throw std::runtime_error("test");
-	}
-}
-
-int	pid_ok(int pid)
-{
-	if (pid == -1)
-	{
-		perror("Fork");
-		exit(errno);
-	}
-	if (pid == 0)
-		return (1);
-	return (0);
-}
-
-// std::stringstream string;
-// 	std::ifstream f("html_pages/startpage.html");
-// 	if (!f.is_open()) {
-//         std::cerr << "Error opening the file!";
-// 	}
-// 	std::string buffer;
-//     // Read each line from the file
-// 	string << "HTTP/1.1 200 OK\n"
-// 			<< "Content-Type: text/html\nContent-Length: 471\n\n";
-// 	while (std::getline(f, buffer))
-//         string << buffer << std::endl;;
-// 	string.seekg(0, std::ios::end);
-// 	int len = string.tellg();	
-
-// 		sendall(newfd, string.str().data(), &len);
-
 int	WebServSocket::response_cgi(int fd)
 {
 	int	pid;
 	int cgi_in[2];
-	(void)cgi_in;
 	int cgi_out[2];
-	// pipe(cgi_in); // i will implement later.
+	int stdout_fd = dup(STDOUT_FILENO);
+
+	pipe(cgi_in);
 	pipe(cgi_out);
+	write_pipe(cgi_in[1]);
 	add_to_pfds(cgi_out[0]);
 	cgi_map_fds.insert({cgi_out[0], fd});
 	pid = fork();
 	if (pid_ok(pid))
 	{
+		close(cgi_in[1]);
+		listen_pipe(cgi_in[0]);
 		write_pipe(cgi_out[1]);
 		// const char *command[] = {"php-cgi", "-q","html_pages/tester.php", "status=200", NULL};
 		// execve(const_cast<char *>("/usr/bin/php-cgi"), const_cast<char **>(command), NULL);
@@ -175,7 +105,10 @@ int	WebServSocket::response_cgi(int fd)
 		const char *command[] = {"./html_pages/a.out","html_pages/index.txt", NULL};
 		execve(const_cast<char *>(command[0]), const_cast<char **>(command), NULL);
 	}
-	close(cgi_out[1]); //make better
+	close(cgi_out[1]);
+	close(cgi_in[0]);
+	close(cgi_in[1]);
+	write_pipe(stdout_fd);
 	return (pid);
 }
 
