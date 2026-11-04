@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        ::::::::            */
-/*   HttpRequest.hpp                                    :+:    :+:            */
-/*                                                     +:+                    */
-/*   By: jukerste <jukerste@student.codam.nl>         +#+                     */
-/*                                                   +#+                      */
-/*   Created: 2026/10/19 15:07:49 by jukerste      #+#    #+#                 */
-/*   Updated: 2026/10/27 15:07:35 by jukerste      ########   odam.nl         */
+/*                                                        :::      ::::::::   */
+/*   HttpRequest.hpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jvan-ast <jvan-ast@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/10/19 15:07:49 by jukerste          #+#    #+#             */
+/*   Updated: 2026/11/04 15:41:27 by jvan-ast         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,3 +29,7 @@ struct HttpRequest
 	std::string body; // The payload data (for POST/PUT requests)
 	bool is_complete = false; // helper states for parsing progress (handy for handling chunked or large bodies later)
 };
+
+
+
+

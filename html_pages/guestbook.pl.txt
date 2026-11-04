@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+# $Id: guestbook.pl,v 1.1 2004/04/13 04:15:36 morpheus Exp $
+# guestbook -- demo program demonstrating CGI.pm and other functionality.
+
+use strict;
+
+use CGI qw(:all);       # import shortcuts
+use Fcntl qw(:flock);   # imports LOCK_EX, LOCK_SH, LOCK_NB
+
+sub bail {
+  my $error = "@_";
+  print h2("Unexpected Error"), p($error), end_html;
+  die $error;
+}
+
+my (
+	$CHATNAME, # name of guestbook file
+	$MAXSAVE,  # how many to keep
+	$TITLE,    # page title & header
+	$cur,      # new entry in the guestbook
+	@entries,  # all cur entries
+	$entry,    # one particular entry
+);
+
+$TITLE = "My Nifty Guestbook";
+print header;
+print start_html($TITLE);
+print h1($TITLE);
+
+$CHATNAME = "guests.log";
+$MAXSAVE = 5000;
+
+$cur = CGI->new();		# current request
+
+if ($cur->param("message")) {	# good, we got a message 
+    $cur->param("date", scalar localtime); #set to the current time
+    @entries = ($cur);
+}
+
+# open the file for read-write (preserving old contents)
+open(CHANDLE, "+<$CHATNAME") || bail ("cannot open $CHATNAME: $!\n <P>If you would like to use this script, create the file 'guests.log' in the same directory as this script.</P>"); 
+
+# get exclusive lock on the guestbook (LOCK_EX == exclusive lock)
+flock(CHANDLE, 2) || bail("cannot flock $CHATNAME: $!");
+
+# grab up to $MAXSAVE old entries, newest first
+while(!eof(CHANDLE) && @entries < $MAXSAVE) {
+    $entry = CGI->new(\*CHANDLE); # pass the filehandle by reference
+    push @entries, $entry;
+}
+
+seek (CHANDLE, 0, 0) || bail("cannot rewind $CHATNAME: $!");
+foreach $entry (@entries) {
+    $entry->save (\*CHANDLE); # pass the filehandle by reference
+}
+truncate (CHANDLE, tell(CHANDLE)) || bail("cannot truncate $CHATNAME: $!");
+
+close (CHANDLE) || bail("cannot close $CHATNAME: $!");
+
+print hr, start_form;
+print p("Name:", $cur->textfield(-name => "name"));
+print p("Message:", $cur->textfield(-name     => "message",
+                                    -override => 1,
+                                    -size     => 100));
+print p(submit("send"), reset("clear"));
+print endform, hr;
+
+print h2("Prior Messages");
+foreach $entry (@entries) {
+    printf("%s [%s]: %s", $entry->param("date"), $entry->param("name"),
+           $entry->param("message"));
+    print br();
+}
+
+print end_html;

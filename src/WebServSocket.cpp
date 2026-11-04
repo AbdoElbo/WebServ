@@ -34,13 +34,8 @@ void WebServSocket::server_poll(){
 
 void WebServSocket::handle_cgi_response(std::map<int,int>::iterator resp)
 {
-	char buff[10000];
-	int amnt_read;
-	send(resp->second, "HTTP/1.1 200 OK\nContent-Length: 135\n",36,0);
-	while ((amnt_read = read(resp->first, buff, 10000)) != 0)
-	{
-		sendall(resp->second, buff, &amnt_read);
-	}
+	std::string cgi_response(parse_cgi_response(resp->first));
+	sendall(resp->second, cgi_response.data(), cgi_response.size());
 	std::vector<pollfd>::iterator found = std::find_if(pfds.begin(), pfds.end(), [&](pollfd& x){
 		if (x.fd == resp->first)
 			return (1);
@@ -106,10 +101,6 @@ int	WebServSocket::response_cgi(int fd)
 		close(cgi_in[1]);
 		listen_pipe(cgi_in[0]);
 		write_pipe(cgi_out[1]);
-		// const char *command[] = {"php-cgi", "-q","html_pages/tester.php", "status=200", NULL};
-		// execve(const_cast<char *>("/usr/bin/php-cgi"), const_cast<char **>(command), NULL);
-		// const char *command[] = {"cat","html_pages/index.txt", NULL};
-		// execve(const_cast<char *>("/usr/bin/cat"), const_cast<char **>(command), NULL);
 		const char *command[] = {"./html_pages/a.out","html_pages/index.txt", NULL};
 		execve(const_cast<char *>(command[0]), const_cast<char **>(command), NULL);
 	}
