@@ -95,6 +95,7 @@ void WebServSocket::del_from_pfds(int pfd_i)
     (fd_count)--;
 }
 
+
 inline std::string serializeResponse(const Response &r)
 {
 	Response res = r;
@@ -111,7 +112,7 @@ inline std::string serializeResponse(const Response &r)
 
 void WebServSocket::handle_client_data(int &pfd_i)
 {
-    char buf[256];    // Buffer for client data
+    char buf[8192];    // Buffer for client data
     int nbytes = recv(pfds[pfd_i].fd, buf, sizeof buf, 0);
     int sender_fd = pfds[pfd_i].fd;
 

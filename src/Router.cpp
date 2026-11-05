@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Router.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gekko <gekko@student.42.fr>                +#+  +:+       +#+        */
+/*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:27:08 by gekko             #+#    #+#             */
-/*   Updated: 2026/10/30 18:07:13 by gekko            ###   ########.fr       */
+/*   Updated: 2026/11/05 14:12:17 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,19 @@
 
 static bool locationMatches(const std::string &locPath, const std::string &urlPath)
 {
-	// 1. the URL must start with the location path
+	// the URL must start with the location path
 	if (urlPath.compare(0, locPath.size(), locPath) != 0)
 		return false;
 
-	// 2. then the match must end on a segment boundary
+	// then the match must end on a segment boundary
 	if (urlPath.size() == locPath.size())
-		return true;                       // exact match: /uploads == /uploads
+		return true;   // exact match: /uploads == /uploads
 	if (locPath.back() == '/')
-		return true;                       // location is "/", so everything under it matches
+		return true;  // location is "/", so everything under it matches
 	return urlPath[locPath.size()] == '/'; // next char must be '/', so /uploads/x yes, /uploadsss no
 }
 
-const LocationConfig* findLocation(const ServerConfig &SrvrConf, std::string Path)
+static const LocationConfig* findLocation(const ServerConfig &SrvrConf, std::string Path)
 {
 	const LocationConfig *best = nullptr;
 
@@ -47,7 +47,7 @@ const LocationConfig* findLocation(const ServerConfig &SrvrConf, std::string Pat
 	return best;
 }
 
-Response makeRedirect(const std::string &target)
+static Response makeRedirect(const std::string &target)
 {
 	Response res;
 	res.status = 301;
@@ -56,15 +56,16 @@ Response makeRedirect(const std::string &target)
 	return res;
 }
 
-int	methodIsImplemented(std::string method)
+static int	methodIsImplemented(std::string method)
 {
 	if (method != "GET" && method != "DELETE" && method != "POST")
 		return 0;
 	return 1;
 }
 
-int	methodIsAllowed(const LocationConfig *Loc, std::string method)
+static int	methodIsAllowed(const LocationConfig *Loc, std::string method)
 {
+	// std::cout <<BG<< "Size of methods allowed is " << Loc->allowed_methods.size() <<RESET<< std::endl;
 	for (std::size_t i = 0; i < Loc->allowed_methods.size(); i++)
 	{
 		if (method == Loc->allowed_methods[i])
@@ -73,21 +74,37 @@ int	methodIsAllowed(const LocationConfig *Loc, std::string method)
 	return 0;
 }
 
-int	CheckFileExistance(const LocationConfig* Loc, const Request &req)
+static int	CheckFileExistance(const LocationConfig* Loc, const ServerConfig &SrvrConf , const Request &req)
 {
-	std::string FileName = req.path.substr(Loc->path.size() + 1);
-	std::filesystem::path p = std::filesystem::path(Loc->path) / FileName;
+	std::string FileName = req.path.substr(Loc->path.size());
+	std::filesystem::path p = std::filesystem::path(SrvrConf.root) / FileName;
 	if (std::filesystem::exists(p))
 	{
-		std::cout <<BY<< "File " << FileName << " EXISTS in " << Loc->path <<RESET<< std::endl;
+		std::cout <<BY<< "File " << FileName << " EXISTS in " << p <<RESET<< std::endl;
 		return 1;
 	}
-	std::cout <<BY<< "File " << FileName << " does NOOTTTT exist in " << Loc->path <<RESET<< std::endl;
+	std::cout <<BY<< "File " << FileName << " does NOOTTTT exist in " << p <<RESET<< std::endl;
 	return 0;
+}
+
+static bool	hasDotDot(const std::string &path)
+{
+	std::istringstream	in(path);
+	std::string			segment;
+
+	while (std::getline(in, segment, '/'))
+	{
+		if (segment == "..")
+			return true;
+	}
+	return false;
 }
 
 Response HandleRequest(const Request &req, const ServerConfig &SrvrConf)
 {
+	std::cout <<BG<< "Req Path is " << req.path <<RESET<< std::endl;
+	if (hasDotDot(req.path))
+		return makeError(403); // Sure thing Buddy
 	const LocationConfig* Loc = findLocation(SrvrConf, req.path);
 	if (!Loc)
 		return makeError(404); // Path doesn't exist thus 404
@@ -99,7 +116,7 @@ Response HandleRequest(const Request &req, const ServerConfig &SrvrConf)
 		return makeError(405); // Method Not Allowed
 	if (SrvrConf.client_max_body < req.body.size())
 		return makeError(413); // Max Body Exceeded
-	if (!CheckFileExistance(Loc, req))
+	if (!CheckFileExistance(Loc, SrvrConf, req))
 		return makeError(404); // File doesn't exist
 	return makeError(200); // SUCCESS
 }

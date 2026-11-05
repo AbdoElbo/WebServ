@@ -32,25 +32,25 @@ ServerConfig makeTestConfig()
 	rootLoc.allowed_methods = {"GET"};
 
 	LocationConfig PagesLoc;
-	rootLoc.path = "../Pages";
-	rootLoc.allowed_methods = {"GET"};
+	PagesLoc.path = "/Pages";
+	PagesLoc.allowed_methods = {"GET"};
 
 	LocationConfig uploadLoc;
 	uploadLoc.path = "/uploads";
 	uploadLoc.allowed_methods = {"GET", "POST", "DELETE"};
 
 	LocationConfig imagesLoc;
-	imagesLoc.path = "/images/img";
+	imagesLoc.path = "/images";
 	imagesLoc.allowed_methods = {"GET", "POST"};
 
 	LocationConfig redir;
-	redir.path = "/Hellooo";
+	redir.path = "/redir";
 	redir.redirect_url = "/images";
 	redir.allowed_methods = {"GET", "POST"};
 
 	ServerConfig server;
 	server.root = "./www";
-	server.locations = {PagesLoc, rootLoc, imagesLoc, uploadLoc, redir};
+	server.locations = {rootLoc, PagesLoc, imagesLoc, uploadLoc, redir};
 	return server;
 }
 

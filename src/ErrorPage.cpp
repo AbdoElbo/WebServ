@@ -6,7 +6,7 @@
 /*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:27:08 by gekko             #+#    #+#             */
-/*   Updated: 2026/10/28 19:15:49 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/11/04 16:11:52 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ Response makeError(int code)
 {
 	Response res;
 
+	std::cout << "im returning a " << code << ": " << reasonPhrase(code) << std::endl;
 	res.status = code;
 	res.reason = reasonPhrase(code);
 	res.headers["Content-Type"] = "text/html";
