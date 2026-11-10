@@ -6,7 +6,7 @@
 /*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:27:08 by gekko             #+#    #+#             */
-/*   Updated: 2026/11/05 14:12:17 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/11/10 11:11:36 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,17 +74,49 @@ static int	methodIsAllowed(const LocationConfig *Loc, std::string method)
 	return 0;
 }
 
-static int	CheckFileExistance(const LocationConfig* Loc, const ServerConfig &SrvrConf , const Request &req)
+static std::string getMimeType(const std::filesystem::path &p)
 {
-	std::string FileName = req.path.substr(Loc->path.size());
-	std::filesystem::path p = std::filesystem::path(SrvrConf.root) / FileName;
+	std::string ext = p.extension().string();
+	if (ext == ".html" || ext == ".htm")	return "text/html";
+	if (ext == ".css")	return "text/css";
+	if (ext == ".js")	return "application/javascript";
+	if (ext == ".png")	return "image/png";
+	if (ext == ".jpg" || ext == ".jpeg")	return "image/jpeg";
+	if (ext == ".gif")	return "image/gif";
+	if (ext == ".txt")	return "text/plain";
+	return "application/octet-stream";
+}
+
+Response returnRequestedPage(const std::filesystem::path &p)
+{
+	Response res;
+
+	std::ifstream in(p, std::ios::binary);
+	if (!in.is_open())
+		return makeError(403);
+
+	std::stringstream buffer;
+	buffer << in.rdbuf();
+	res.status = 200;
+	res.reason = "OK";
+	res.headers["Content-Type"] = getMimeType(p);
+	res.body = buffer.str();
+	return res;
+}
+
+static Response	CheckFileExistance(const ServerConfig &SrvrConf , const Request &req)
+{
+	std::string realpath = req.path;
+	while (!realpath.empty() && realpath[0] == '/')
+		realpath.erase(0, 1);
+	std::filesystem::path p = std::filesystem::path(SrvrConf.root) / realpath;
 	if (std::filesystem::exists(p))
 	{
-		std::cout <<BY<< "File " << FileName << " EXISTS in " << p <<RESET<< std::endl;
-		return 1;
+		std::cout <<BY<< "File " << realpath << " EXISTS in " << p <<RESET<< std::endl;
+		return returnRequestedPage(p);
 	}
-	std::cout <<BY<< "File " << FileName << " does NOOTTTT exist in " << p <<RESET<< std::endl;
-	return 0;
+	std::cout <<BR<< "File " << realpath << " does NOOTTTT exist in " << p <<RESET<< std::endl;
+	return makeError(404);
 }
 
 static bool	hasDotDot(const std::string &path)
@@ -116,7 +148,5 @@ Response HandleRequest(const Request &req, const ServerConfig &SrvrConf)
 		return makeError(405); // Method Not Allowed
 	if (SrvrConf.client_max_body < req.body.size())
 		return makeError(413); // Max Body Exceeded
-	if (!CheckFileExistance(Loc, SrvrConf, req))
-		return makeError(404); // File doesn't exist
-	return makeError(200); // SUCCESS
+	return CheckFileExistance(SrvrConf, req);
 }

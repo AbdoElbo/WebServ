@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Routing.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gekko <gekko@student.42.fr>                +#+  +:+       +#+        */
+/*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:28:09 by gekko             #+#    #+#             */
-/*   Updated: 2026/10/30 18:02:23 by gekko            ###   ########.fr       */
+/*   Updated: 2026/11/10 10:51:30 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,3 +57,4 @@ std::string	reasonPhrase(int code);
 std::string	buildErrorPage(int code, const std::string& reason);
 Response	makeError(int code);
 Response	HandleRequest(const Request &req, const ServerConfig &SrvrConf);
+Response	returnRequestedPage(const std::filesystem::path &p);
