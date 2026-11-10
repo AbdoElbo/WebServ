@@ -8,7 +8,9 @@ SRC			:=	main.cpp \
 				helper_func.cpp \
 				WebServSocket.cpp \
 				ErrorPage.cpp \
-				Router.cpp
+				Router.cpp \
+				Parser.cpp \
+			 	Tokenizer.cpp
 OBJ			:=	$(addprefix $(OBJ_DIR)/,$(SRC:.cpp=.o))
 DEP			:=	$(OBJ:%.o=%.d)
 HEADERS		:=	-I include/

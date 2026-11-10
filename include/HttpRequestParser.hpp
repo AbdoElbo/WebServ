@@ -6,7 +6,7 @@
 /*   By: jvan-ast <jvan-ast@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/19 15:57:21 by jukerste          #+#    #+#             */
-/*   Updated: 2026/11/02 17:40:35 by jvan-ast         ###   ########.fr       */
+/*   Updated: 2026/11/10 15:12:59 by jvan-ast         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,13 @@
 
 class HttpRequestParser
 {
-	public:
-		static HttpRequest parse(const std::string &raw_data); // Main function to parse a raw HTTP request string
 	private:
 		static void parse_request_line(const std::string &line, HttpRequest &request);
 		static void split_uri(HttpRequest &request);
 		static void parse_header(const std::string &line, HttpRequest &request);
 		static void parse_query_str(const std::string &query_str, HttpRequest &request);
 		static void validate_request(const HttpRequest &request);
+		static std::string decode_chunked_body(const std::string &raw_body);
+	public:
+		static HttpRequest parse(const std::string &raw_data); // Main function to parse a raw HTTP request string
 };

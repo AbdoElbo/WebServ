@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jvan-ast <jvan-ast@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/09 16:09:23 by jukerste          #+#    #+#             */
-/*   Updated: 2026/11/05 14:13:05 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/11/10 15:12:45 by jvan-ast         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,13 +38,13 @@ struct LocationConfig
 
 struct ServerConfig
 {
-	int port = 8080;								// Port number the sever listens on
+	int port = 8080; // Port number the sever listens on
 	std::string host_ip = "127.0.0.1";
-	std::vector<std::string> server_names;			// something.com
-	std::filesystem::path root;		// global root for server
+	std::vector<std::string> server_names; // something.com
+	std::optional<std::filesystem::path> root; // global root for server
 	std::optional<std::string> index_file;
-	size_t client_max_body = 1048576;				// Default 1MB limit
-	std::map<int, std::string> error_pages;			// like error code 404 or path: /error.404.html
+	size_t client_max_body = 1048576; // Default 1MB limit
+	std::map<int, std::string> error_pages; // like error code 404 or path: /error.404.html
 	std::vector<LocationConfig> locations;
 };
 
