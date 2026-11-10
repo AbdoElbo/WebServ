@@ -6,7 +6,9 @@ OBJ_DIR		:=	build
 SRC			:=	main.cpp \
 				HttpRequestParser.cpp \
 				helper_func.cpp \
-				WebServSocket.cpp
+				WebServSocket.cpp \
+				ErrorPage.cpp \
+				Router.cpp
 OBJ			:=	$(addprefix $(OBJ_DIR)/,$(SRC:.cpp=.o))
 DEP			:=	$(OBJ:%.o=%.d)
 HEADERS		:=	-I include/

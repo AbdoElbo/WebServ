@@ -13,6 +13,7 @@
 #include <vector>
 #ifndef WEBSERVSOCKET_HPP
 #define WEBSERVSOCKET_HPP
+#include "Routing.hpp"
 
 class WebServSocket
 {

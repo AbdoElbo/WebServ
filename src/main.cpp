@@ -1,26 +1,69 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jvan-ast <jvan-ast@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/10/19 15:49:00 by jukerste          #+#    #+#             */
-/*   Updated: 2026/11/03 16:58:18 by jvan-ast         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
+// MY PERSONAL TEST. Not part of the project build.
+#include <iostream>
+#include "Routing.hpp"
 #include "WebServSocket.hpp"
+
+// static void run(const ServerConfig &server, const std::string &method, const std::string &path)
+// {
+// 	Request req;
+// 	req.method = method;
+// 	req.path = path;
+// 	req.version = "HTTP/1.1";
+
+// 	Response res = HandleRequest(req, server);
+
+// 	std::cout << "----Method: " << method << " | Path: " << path << " ----\n";
+// 	if (res.status < 302)
+// 		std::cout <<BB<< "### "<< res.status << " " << res.reason <<" ###"<<RESET<< "\n\n";
+// 	else
+// 		std::cout <<BR<< "### "<< res.status << " " << res.reason <<" ###"<<RESET<< "\n\n";
+
+// 	// Next lines are just for Redirection
+// 	auto it = res.headers.find("Location");
+// 	if (it != res.headers.end())
+// 		std::cout << "Location: " << it->second << "\n";
+// }
+
+
+ServerConfig makeTestConfig()
+{
+	LocationConfig rootLoc;
+	rootLoc.path = "/";
+	rootLoc.redirect_url = "/pages/index.html";
+	rootLoc.allowed_methods = {"GET"};
+
+	LocationConfig PagesLoc;
+	PagesLoc.path = "/pages";
+	PagesLoc.allowed_methods = {"GET"};
+
+	LocationConfig uploadLoc;
+	uploadLoc.path = "/uploads";
+	uploadLoc.allowed_methods = {"GET", "POST", "DELETE"};
+
+	LocationConfig imagesLoc;
+	imagesLoc.path = "/images";
+	imagesLoc.allowed_methods = {"GET", "POST"};
+
+	LocationConfig redir;
+	redir.path = "/redir";
+	redir.redirect_url = "/pages/about.html";
+	redir.allowed_methods = {"GET", "POST"};
+
+	ServerConfig server;
+	server.root = "./www";
+	server.locations = {rootLoc, PagesLoc, imagesLoc, uploadLoc, redir};
+	return server;
+}
 
 int main()
 {
+	ServerConfig srv = makeTestConfig();
+
 	WebServSocket Server("9034");
+	Server.set_config(srv);
 	Server.set_listening_socket();
 
 	puts("pollserver: waiting for connections...");
-
-    Server.server_poll();
-    // Test 1: A fully valid HTTP/1.1 request with query parameters and body
-
-    return 0;
+	Server.server_poll();
+	return 0;
 }

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Julian_Config.hpp                                  :+:      :+:    :+:   */
+/*   Config.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/09 16:09:23 by jukerste          #+#    #+#             */
-/*   Updated: 2026/10/21 19:07:53 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/11/05 14:13:05 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ struct ServerConfig
 	int port = 8080;								// Port number the sever listens on
 	std::string host_ip = "127.0.0.1";
 	std::vector<std::string> server_names;			// something.com
-	std::optional<std::filesystem::path> root;		// global root for server
+	std::filesystem::path root;		// global root for server
 	std::optional<std::string> index_file;
 	size_t client_max_body = 1048576;				// Default 1MB limit
 	std::map<int, std::string> error_pages;			// like error code 404 or path: /error.404.html
