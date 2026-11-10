@@ -22,7 +22,7 @@ $(NAME) : $(OBJ)
 	$(CC) $(CC_FLAGS) $(HEADERS) $(OBJ) -o $(@)
 
 $(OBJ_DIR)/%.o : %.cpp | build
-	bear --append -- $(CC) $(CC_FLAGS) -MMD -o $@ -c $< $(HEADERS)
+	$(CC) $(CC_FLAGS) -MMD -o $@ -c $< $(HEADERS)
 
 build :
 	mkdir -p $(OBJ_DIR)

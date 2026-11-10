@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Config.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jvan-ast <jvan-ast@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/10/09 16:09:23 by jukerste          #+#    #+#             */
-/*   Updated: 2026/11/10 15:18:08 by jvan-ast         ###   ########.fr       */
+/*                                                        ::::::::            */
+/*   Config.hpp                                         :+:    :+:            */
+/*                                                     +:+                    */
+/*   By: jvan-ast <jvan-ast@student.42.fr>            +#+                     */
+/*                                                   +#+                      */
+/*   Created: 2026/10/09 16:09:23 by jukerste      #+#    #+#                 */
+/*   Updated: 2026/11/10 17:23:14 by jukerste      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,4 +46,4 @@ struct ServerConfig
 	std::vector<LocationConfig> locations;
 };
 
-std::vector<std::string> tokenize(const std::filesystem::path& file_path);
+std::vector<std::string> tokenize(const std::filesystem::path &file_path);
