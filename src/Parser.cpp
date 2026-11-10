@@ -6,11 +6,12 @@
 /*   By: jukerste <jukerste@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2026/10/16 15:10:14 by jukerste      #+#    #+#                 */
-/*   Updated: 2026/10/18 04:08:02 by jul           ########   odam.nl         */
+/*   Updated: 2026/11/10 16:38:05 by jukerste      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parser.hpp"
+#include "Config.hpp"
 
 LocationConfig parse_location(const std::vector<std::string> &tokens, size_t &i)
 {

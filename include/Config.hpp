@@ -6,7 +6,7 @@
 /*   By: jvan-ast <jvan-ast@student.42.fr>            +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2026/10/09 16:09:23 by jukerste      #+#    #+#                 */
-/*   Updated: 2026/11/10 17:23:14 by jukerste      ########   odam.nl         */
+/*   Updated: 2026/11/10 17:26:31 by jukerste      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ struct LocationConfig
 
 struct ServerConfig
 {
-	int port = 8080; // Port number the sever listens on
+	int port = 8040; // Port number the sever listens on
 	std::string host_ip = "127.0.0.1";
 	std::vector<std::string> server_names; // something.com
 	std::filesystem::path root; // global root for server
