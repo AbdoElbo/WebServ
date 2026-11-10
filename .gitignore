@@ -1,1 +1,13 @@
-Abdo_/src/my_test
+.vscode/
+compile_commands.json
+.cache
+en.subject.pdf
+.gitignore
+build/
+/!(*.*)
+*.out
+main1 copy.cpp
+compile_commands
+socket.cpp
+to-do
+/src_orig

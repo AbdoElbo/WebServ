@@ -37,7 +37,7 @@ class WebServSocket
 		void 				del_from_pfds(int pfd_i);
 		void 				add_to_pfds(int fd);
 		void				process_connections();
-		int				response_cgi(int fd);
+		int					response_cgi(int fd);
 		void				handle_cgi_response(std::map<int,int>::iterator resp);
 
 	

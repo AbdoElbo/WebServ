@@ -24,43 +24,11 @@
 // 		std::cout << "Location: " << it->second << "\n";
 // }
 
-
-ServerConfig makeTestConfig()
-{
-	LocationConfig rootLoc;
-	rootLoc.path = "/";
-	rootLoc.redirect_url = "/pages/index.html";
-	rootLoc.allowed_methods = {"GET"};
-
-	LocationConfig PagesLoc;
-	PagesLoc.path = "/pages";
-	PagesLoc.allowed_methods = {"GET"};
-
-	LocationConfig uploadLoc;
-	uploadLoc.path = "/uploads";
-	uploadLoc.allowed_methods = {"GET", "POST", "DELETE"};
-
-	LocationConfig imagesLoc;
-	imagesLoc.path = "/images";
-	imagesLoc.allowed_methods = {"GET", "POST"};
-
-	LocationConfig redir;
-	redir.path = "/redir";
-	redir.redirect_url = "/pages/about.html";
-	redir.allowed_methods = {"GET", "POST"};
-
-	ServerConfig server;
-	server.root = "./www";
-	server.locations = {rootLoc, PagesLoc, imagesLoc, uploadLoc, redir};
-	return server;
-}
-
 int main()
 {
 	ServerConfig srv = makeTestConfig();
 
 	WebServSocket Server("9034");
-	Server.set_config(srv);
 	Server.set_listening_socket();
 
 	puts("pollserver: waiting for connections...");
