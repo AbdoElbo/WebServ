@@ -6,7 +6,7 @@
 /*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:27:08 by gekko             #+#    #+#             */
-/*   Updated: 2026/11/10 11:11:36 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/11/10 14:08:27 by aelbouaz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,6 @@ static int	methodIsImplemented(std::string method)
 
 static int	methodIsAllowed(const LocationConfig *Loc, std::string method)
 {
-	// std::cout <<BG<< "Size of methods allowed is " << Loc->allowed_methods.size() <<RESET<< std::endl;
 	for (std::size_t i = 0; i < Loc->allowed_methods.size(); i++)
 	{
 		if (method == Loc->allowed_methods[i])
@@ -112,10 +111,11 @@ static Response	CheckFileExistance(const ServerConfig &SrvrConf , const Request 
 	std::filesystem::path p = std::filesystem::path(SrvrConf.root) / realpath;
 	if (std::filesystem::exists(p))
 	{
-		std::cout <<BY<< "File " << realpath << " EXISTS in " << p <<RESET<< std::endl;
-		return returnRequestedPage(p);
+		if (std::filesystem::is_regular_file(p))
+			return returnRequestedPage(p);
+		else if (std::filesystem::is_directory(p))
+			return makeError(403);
 	}
-	std::cout <<BR<< "File " << realpath << " does NOOTTTT exist in " << p <<RESET<< std::endl;
 	return makeError(404);
 }
 
@@ -134,7 +134,6 @@ static bool	hasDotDot(const std::string &path)
 
 Response HandleRequest(const Request &req, const ServerConfig &SrvrConf)
 {
-	std::cout <<BG<< "Req Path is " << req.path <<RESET<< std::endl;
 	if (hasDotDot(req.path))
 		return makeError(403); // Sure thing Buddy
 	const LocationConfig* Loc = findLocation(SrvrConf, req.path);

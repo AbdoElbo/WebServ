@@ -29,10 +29,11 @@ ServerConfig makeTestConfig()
 {
 	LocationConfig rootLoc;
 	rootLoc.path = "/";
+	rootLoc.redirect_url = "/pages/index.html";
 	rootLoc.allowed_methods = {"GET"};
 
 	LocationConfig PagesLoc;
-	PagesLoc.path = "/Pages";
+	PagesLoc.path = "/pages";
 	PagesLoc.allowed_methods = {"GET"};
 
 	LocationConfig uploadLoc;
@@ -45,7 +46,7 @@ ServerConfig makeTestConfig()
 
 	LocationConfig redir;
 	redir.path = "/redir";
-	redir.redirect_url = "/images";
+	redir.redirect_url = "/pages/about.html";
 	redir.allowed_methods = {"GET", "POST"};
 
 	ServerConfig server;
