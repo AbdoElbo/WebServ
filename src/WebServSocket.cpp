@@ -62,6 +62,7 @@ void WebServSocket::process_connections()
             } 
 			else if ((resp = cgi_map_fds.find(pfds[it].fd)) != cgi_map_fds.end())
 			{
+				//if its a cgi request
 				handle_cgi_response(resp);
 			}
 			else 
@@ -128,12 +129,22 @@ void WebServSocket::handle_client_request(int &pfd_i)
         close(pfds[pfd_i].fd); // Bye!
         del_from_pfds(pfd_i);
 		--pfd_i;
-    } else { // We got some good data from a client
+    } 
+	else if (### is_static exist)
+	{
+
+	}
+	else if (## is_cgi_exist)
+	{ // We got some good data from a client
 
         std::cout << "pollserver: recv from fd " << sender_fd << ": " << std::string_view(buf, nbytes);;
         // Send to everyone!
         response_cgi(sender_fd);
     }
+	else 
+	{ 
+		
+	}
 }
 
 void WebServSocket::add_to_pfds(int fd)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Router.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aelbouaz <aelbouaz@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jvan-ast <jvan-ast@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/17 18:27:08 by gekko             #+#    #+#             */
-/*   Updated: 2026/11/10 14:08:27 by aelbouaz         ###   ########.fr       */
+/*   Updated: 2026/11/26 18:54:47 by jvan-ast         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ Response returnRequestedPage(const std::filesystem::path &p)
 	res.status = 200;
 	res.reason = "OK";
 	res.headers["Content-Type"] = getMimeType(p);
+	res.headers["Content-Length"] = buffer.str().size();
 	res.body = buffer.str();
 	return res;
 }
